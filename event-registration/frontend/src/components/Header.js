@@ -11,8 +11,7 @@ import {
   Box,
   IconButton,
   Menu,
-  MenuItem,
-  Avatar
+  MenuItem
 } from '@mui/material';
 import { 
   Event as EventIcon,

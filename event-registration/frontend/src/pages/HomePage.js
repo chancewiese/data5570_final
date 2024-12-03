@@ -1,16 +1,17 @@
 // src/pages/HomePage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Container,
   Typography,
   Button,
-  Box,
-  Paper
+  Box
 } from '@mui/material';
-import { EventNote as EventIcon, AdminPanelSettings as AdminIcon } from '@mui/icons-material';
+import { EventNote as EventIcon } from '@mui/icons-material';
 
 const HomePage = () => {
+  const { user } = useAuth();
   return (
     <Container maxWidth="md">
       <Box
@@ -28,7 +29,7 @@ const HomePage = () => {
           Welcome to Event Registration
         </Typography>
         <Typography variant="h5" color="text.secondary" paragraph sx={{ mb: 4 }}>
-          Browse and register for upcoming events or manage your event listings
+          Browse and register for upcoming events {user?.is_staff && ' or manage your event listings'}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
