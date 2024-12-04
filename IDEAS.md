@@ -1,17 +1,22 @@
 ## Ideas and suggestions here
 
-# Ideas
+
+
+Priority:
+`Google Maps/OpenStreetMap`: Show event locations on a map and provide directions to help users find venues easily.
+2. Improve homepage looks, maybe have a box with upcoming events on the homepage.
+3. Add the ability to add images or attachments to an event card or event page. Maybe a gallery
+
+
+
+Other:
 1. Make it so events can be 'sub-events' or children events of other ones. 
     We can limit it so each child can only have 1 parent event, 
     and if it's a parent event, it can't have a parent event itself
-2. Improve homepage looks, maybe have a box with upcoming events on the homepage.
-3. Add the ability to add images or attachments to an event card or event page.
 6. Custom registration forms (this might be a big one)
 `Real-Time Updates`: Enable live updates for event availability using WebSockets or long polling, so users see changes instantly.
 `Notifications`: Let users sign up for email or SMS reminders for upcoming events to keep them informed.
 `Waitlist Management`: Add a feature for users to join a waitlist for fully booked events, so they can be notified if spots open up.
-`Google Maps/OpenStreetMap`: Show event locations on a map and provide directions to help users find venues easily.
-
 
 
 
