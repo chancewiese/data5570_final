@@ -32,6 +32,8 @@ import {
   ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import EventForm from '../components/EventForm';
+import { Share2 } from 'lucide-react';
+import ShareDialog from '../components/ShareDialog';
 
 const EventDetailPage = () => {
   const { urlName } = useParams();
@@ -44,6 +46,7 @@ const EventDetailPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [registrationError, setRegistrationError] = useState(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const fetchEventData = async () => {
     try {
@@ -188,8 +191,15 @@ const EventDetailPage = () => {
             </Box>
           </Box>
           
-          {/* Admin Actions */}
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          {/* Actions */}
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <IconButton
+              onClick={() => setShareDialogOpen(true)}
+              color="primary"
+              size="large"
+            >
+              <Share2 />
+            </IconButton>
             <Button
               variant="contained"
               color="primary"
@@ -351,6 +361,11 @@ const EventDetailPage = () => {
           />
         </DialogContent>
       </Dialog>
+        <ShareDialog
+          event={event}
+          open={shareDialogOpen}
+          onClose={() => setShareDialogOpen(false)}
+        />
     </Container>
   );
 };

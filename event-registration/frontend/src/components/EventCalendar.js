@@ -9,7 +9,8 @@ import {
   Card,
   CardContent,
   IconButton,
-  useTheme
+  useTheme,
+  Alert
 } from '@mui/material';
 import { 
   ChevronLeft as ChevronLeftIcon, 
@@ -18,7 +19,7 @@ import {
   AccessTime as AccessTimeIcon
 } from '@mui/icons-material';
 
-const EventCalendar = ({ events }) => {
+const EventCalendar = ({ events, showEmptyMessage = false, filterType = 'all' }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const theme = useTheme();
@@ -67,11 +68,11 @@ const EventCalendar = ({ events }) => {
 
   // Get events for a specific date
   const getEventsForDate = (date) => {
-      return events.filter(event => {
-        const eventDate = new Date(event.date + 'T00:00:00');
-        return eventDate.toDateString() === date.toDateString();
-      });
-    };
+    return events.filter(event => {
+      const eventDate = new Date(event.date + 'T00:00:00');
+      return eventDate.toDateString() === date.toDateString();
+    });
+  };
 
   const isRegisteredForEvent = (event) => {
     return event.registrations?.some(reg => reg.user.id === user?.id);
@@ -96,14 +97,32 @@ const EventCalendar = ({ events }) => {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   };
 
+  // Show message if no events match the filter
+  if (events.length === 0 && showEmptyMessage) {
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Alert severity="info">
+          {filterType === 'registered' 
+            ? "You haven't registered for any events yet."
+            : "No available events found."}
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Paper className="p-4">
+    <Paper sx={{ p: 4 }}>
       {/* Calendar Header */}
-      <Box className="flex items-center justify-between mb-4">
-        <Typography variant="h5" className="font-semibold">
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 4 
+      }}>
+        <Typography variant="h5" sx={{ fontWeight: 500 }}>
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </Typography>
-        <Box className="flex items-center gap-2">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton onClick={handlePrevMonth} size="small">
             <ChevronLeftIcon />
           </IconButton>
@@ -114,10 +133,21 @@ const EventCalendar = ({ events }) => {
       </Box>
 
       {/* Calendar Grid */}
-      <Box className="grid grid-cols-7 gap-2">
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(7, 1fr)', 
+        gap: 1 
+      }}>
         {/* Weekday headers */}
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <Box key={day} className="p-2 text-center font-semibold">
+          <Box 
+            key={day} 
+            sx={{ 
+              p: 1, 
+              textAlign: 'center', 
+              fontWeight: 'medium' 
+            }}
+          >
             {day}
           </Box>
         ))}
@@ -130,26 +160,41 @@ const EventCalendar = ({ events }) => {
           return (
             <Box
               key={index}
-              className={`min-h-32 p-1 border rounded-lg ${
-                isCurrentMonth 
-                  ? 'border-gray-200 dark:border-gray-700' 
-                  : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800'
-              } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
               sx={{
+                minHeight: '120px',
+                p: 1,
+                border: 1,
+                borderColor: isCurrentMonth 
+                  ? 'divider'
+                  : 'action.hover',
+                borderRadius: 1,
                 backgroundColor: isCurrentMonth 
-                  ? theme.palette.background.paper 
-                  : theme.palette.action.hover
+                  ? 'background.paper' 
+                  : 'action.hover',
+                ...(isToday && {
+                  borderColor: 'primary.main',
+                  borderWidth: 2,
+                })
               }}
             >
               <Typography
-                className={`text-sm p-1 rounded-full w-7 h-7 flex items-center justify-center ${
-                  isToday ? 'bg-blue-500 text-white' : ''
-                }`}
+                sx={{
+                  width: 28,
+                  height: 28,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  ...(isToday && {
+                    backgroundColor: 'primary.main',
+                    color: 'primary.contrastText',
+                  })
+                }}
               >
                 {date.getDate()}
               </Typography>
               
-              <Box className="space-y-1 mt-1">
+              <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 {dayEvents.map(event => {
                   const isRegistered = isRegisteredForEvent(event);
                   return (
@@ -157,31 +202,38 @@ const EventCalendar = ({ events }) => {
                       key={event.id}
                       onClick={() => handleEventClick(event)}
                       sx={{
-                        backgroundColor: theme.palette.background.paper,
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease-in-out',
+                        transition: 'all 0.2s',
                         '&:hover': {
                           transform: 'translateY(-2px)',
-                          boxShadow: theme.shadows[4],
-                          backgroundColor: theme.palette.action.hover
+                          boxShadow: 2,
+                          backgroundColor: 'action.hover'
                         }
                       }}
                     >
-                      <CardContent className="p-2">
+                      <CardContent sx={{ p: '8px !important' }}>
                         <Box>
-                          <Typography variant="subtitle2" noWrap className="font-medium">
+                          <Typography 
+                            variant="subtitle2" 
+                            noWrap 
+                            sx={{ fontWeight: 500 }}
+                          >
                             {event.title}
                           </Typography>
-                          <Box className="flex items-center gap-1">
-                            <AccessTimeIcon sx={{ fontSize: '1rem' }} />
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.5 
+                          }}>
+                            <AccessTimeIcon sx={{ fontSize: 16 }} />
                             <Typography variant="caption">
                               {formatTime(event.time)}
                             </Typography>
                             {isRegistered && (
                               <CheckCircleIcon
                                 sx={{
-                                  color: theme.palette.success.main,
-                                  fontSize: '1rem',
+                                  color: 'success.main',
+                                  fontSize: 16,
                                   ml: 0.5
                                 }}
                               />
