@@ -1,5 +1,8 @@
-We can add suggestions/ideas here for improvement
+## Ideas and suggestions here
 
+git information for pushing changes:
+username: chancewiese
+password: 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
 
 1. Make it so events can be 'sub-events' or children events of other ones. 
     We can limit it so each child can only have 1 parent event, 
@@ -18,13 +21,17 @@ We can add suggestions/ideas here for improvement
 Main Ideas (Drex)
 `Event Calendar View`: Add a calendar that shows events by date. Users can click on a date to see what events are scheduled that day.
 `Real-Time Updates`: Enable live updates for event availability using WebSockets or long polling, so users see changes instantly.
-`User Authentication`: Implement user roles like attendee, organizer, and admin to manage access and functionality securely.
-`Admin Panel`: Build a dashboard for admins to manage events, registrations, and users efficiently.
 `Notifications`: Let users sign up for email or SMS reminders for upcoming events to keep them informed.
 
 Other Ideas (Drex)
 `Waitlist Management`: Add a feature for users to join a waitlist for fully booked events, so they can be notified if spots open up.
-`Dark Mode`: Add a dark mode toggle for a more accessible and personalized user experience.
-`Search and Filter`: Allow users to search for events by keywords or filter by category, date, or location for better usability.
 `Social Sharing`: Include share buttons so users can promote events on their social media platforms.
 `Google Maps/OpenStreetMap`: Show event locations on a map and provide directions to help users find venues easily.
+
+
+Added:
+`Dark Mode`: Add a dark mode toggle for a more accessible and personalized user experience.
+`Search and Filter`: Allow users to search for events by keywords or filter by category, date, or location for better usability.
+`User Authentication`: Implement user roles like attendee, organizer, and admin to manage access and functionality securely.
+        - `Admin Panel`: Build a dashboard for admins to manage events, registrations, and users efficiently.
+        - (There's an admin toggle on the account page which makes more buttons visible, essentially turning the whole site into an admin version)

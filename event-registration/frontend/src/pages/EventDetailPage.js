@@ -22,14 +22,14 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Stack
 } from '@mui/material';
 import {
   CalendarToday as CalendarIcon,
   AccessTime as TimeIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Group as GroupIcon
+  Group as GroupIcon,
+  ArrowBack as ArrowBackIcon
 } from '@mui/icons-material';
 import EventForm from '../components/EventForm';
 
@@ -69,7 +69,7 @@ const EventDetailPage = () => {
   const isFullyBooked = event?.capacity !== null && registrationCount >= (event?.capacity || 0);
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    const date = new Date(event.date + 'T00:00:00');
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return `${days[date.getDay()]}, ${date.toLocaleDateString()}`;
   };
@@ -189,16 +189,26 @@ const EventDetailPage = () => {
           </Box>
           
           {/* Admin Actions */}
-          {isAdmin && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton onClick={() => setEditDialogOpen(true)} color="primary">
-                <EditIcon />
-              </IconButton>
-              <IconButton onClick={() => setDeleteDialogOpen(true)} color="error">
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          )}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate('/events')}
+            >
+              Events
+            </Button>
+            {isAdmin && (
+              <>
+                <IconButton onClick={() => setEditDialogOpen(true)} color="primary">
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => setDeleteDialogOpen(true)} color="error">
+                  <DeleteIcon />
+                </IconButton>
+              </>
+            )}
+          </Box>
         </Box>
 
         {/* Event Description */}

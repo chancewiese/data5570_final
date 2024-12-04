@@ -16,6 +16,7 @@ import CreateEventPage from './pages/CreateEventPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AccountPage from './pages/AccountPage';
+import CalendarPage from './pages/CalendarPage';
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ const AppRoutes = () => {
           />
           <Route path="/events/:urlName" element={<EventDetailPage />} />
           <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+          <Route path="/calendar" element={<CalendarPage />} />
         </Routes>
       </main>
     </div>

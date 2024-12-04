@@ -1,5 +1,5 @@
 // src/components/Sidebar.js
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -14,7 +14,6 @@ import {
   IconButton,
   Typography,
   Collapse,
-  Button,
   Divider
 } from '@mui/material';
 import {
@@ -29,7 +28,8 @@ import {
   DarkMode as DarkModeIcon,
   ExpandLess,
   ExpandMore,
-  Monitor as MonitorIcon
+  Monitor as MonitorIcon,
+  CalendarMonth as CalendarIcon
 } from '@mui/icons-material';
 
 const Sidebar = () => {
@@ -52,7 +52,7 @@ const Sidebar = () => {
     if (!themeMode) {
       setTheme('system');
     }
-  }, []);
+  }, [themeMode, setTheme]);
 
   const toggleDrawer = (isOpen) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -70,6 +70,7 @@ const Sidebar = () => {
   const menuItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
     { text: 'Events', icon: <EventIcon />, path: '/events' },
+    { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
     ...(user ? [{ text: 'Account', icon: <AccountIcon />, path: '/account' }] : [])
   ];
 
@@ -174,7 +175,7 @@ const Sidebar = () => {
         color="inherit"
         aria-label="menu"
         onClick={toggleDrawer(true)}
-        sx={{ ml: -1 }} // Removes the left margin
+        sx={{ ml: -1 }}
       >
         <MenuIcon />
       </IconButton>

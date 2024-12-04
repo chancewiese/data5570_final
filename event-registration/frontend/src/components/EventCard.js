@@ -1,5 +1,4 @@
 // src/components/EventCard.js
-import React from 'react';
 import { 
   Card, 
   CardContent, 
@@ -19,11 +18,9 @@ import { useNavigate } from 'react-router-dom';
 const EventCard = ({ event, isRegistered = false, currentUser }) => {
   const navigate = useNavigate();
   const registrationCount = event?.registrations?.length || 0;
-  const isFullyBooked = event.capacity !== null && registrationCount >= event.capacity;
-  const isAdmin = currentUser?.is_staff;
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString + 'T00:00:00');
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return `${days[date.getDay()]}, ${date.toLocaleDateString()}`;
   };
