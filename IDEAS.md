@@ -1,9 +1,5 @@
 ## Ideas and suggestions here
 
-git information for pushing changes:
-username: chancewiese
-password: 
-
 1. Make it so events can be 'sub-events' or children events of other ones. 
     We can limit it so each child can only have 1 parent event, 
     and if it's a parent event, it can't have a parent event itself
