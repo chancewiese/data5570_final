@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { CssBaseline } from '@mui/material';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import Header from './components/Header';
@@ -17,13 +19,11 @@ import AccountPage from './pages/AccountPage';
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
-
   if (loading) {
     return <div>Loading...</div>;
   }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Header />
       <main>
         <Routes>
@@ -52,11 +52,14 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <Router>
-          <AppRoutes />
-        </Router>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CssBaseline />
+          <Router>
+            <AppRoutes />
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   );
 };

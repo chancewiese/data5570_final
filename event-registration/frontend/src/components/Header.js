@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   AppBar, 
   Toolbar, 
@@ -11,18 +12,26 @@ import {
   Box,
   IconButton,
   Menu,
-  MenuItem
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { 
   Event as EventIcon,
   AccountCircle as AccountIcon,
-  Logout as LogoutIcon
+  Logout as LogoutIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { themeMode, setTheme } = useTheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenuClick = (event) => {
@@ -37,6 +46,12 @@ const Header = () => {
     logout();
     navigate('/login');
     handleMenuClose();
+  };
+
+  const handleThemeChange = (event) => {
+    setTheme(event.target.value);
+    // Don't close the menu when changing theme
+    event.stopPropagation();
   };
 
   return (
@@ -87,6 +102,10 @@ const Header = () => {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
+                PaperProps={{
+                  elevation: 3,
+                  sx: { minWidth: 200 }
+                }}
               >
                 <MenuItem 
                   onClick={() => {
@@ -94,10 +113,35 @@ const Header = () => {
                     handleMenuClose();
                   }}
                 >
-                  <AccountIcon sx={{ mr: 1 }} /> My Account
+                  <ListItemIcon>
+                    <AccountIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>My Account</ListItemText>
                 </MenuItem>
+
+                <MenuItem sx={{ display: 'block' }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Theme</InputLabel>
+                    <Select
+                      value={themeMode}
+                      label="Theme"
+                      onChange={handleThemeChange}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MenuItem value="system">System</MenuItem>
+                      <MenuItem value="light">Light</MenuItem>
+                      <MenuItem value="dark">Dark</MenuItem>
+                    </Select>
+                  </FormControl>
+                </MenuItem>
+
+                <Divider />
+                
                 <MenuItem onClick={handleLogout}>
-                  <LogoutIcon sx={{ mr: 1 }} /> Logout
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
                 </MenuItem>
               </Menu>
             </>

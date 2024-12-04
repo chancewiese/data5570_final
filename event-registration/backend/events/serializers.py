@@ -1,7 +1,7 @@
 # events/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Event, Registration
+from .models import Event, Registration, UserPreferences
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,3 +111,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def get_event_title(self, obj):
         return obj.event.title if obj.event else None
+
+class UserPreferencesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreferences
+        fields = ('theme_mode',)

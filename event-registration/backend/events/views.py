@@ -6,8 +6,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Event, Registration
-from .serializers import EventSerializer, RegistrationSerializer, UserSerializer
+from .models import Event, Registration, UserPreferences
+from .serializers import EventSerializer, RegistrationSerializer, UserSerializer, UserPreferencesSerializer
 
 class IsStaffOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -90,6 +90,22 @@ class UserViewSet(viewsets.ModelViewSet):
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+    
+    @action(detail=True, methods=['GET', 'PATCH'])
+    def preferences(self, request, pk=None):
+        user = self.get_object()
+        preferences, created = UserPreferences.objects.get_or_create(user=user)
+
+        if request.method == 'GET':
+            serializer = UserPreferencesSerializer(preferences)
+            return Response(serializer.data)
+
+        elif request.method == 'PATCH':
+            serializer = UserPreferencesSerializer(preferences, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['GET'])
     def me(self, request):

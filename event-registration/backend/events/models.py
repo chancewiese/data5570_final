@@ -62,3 +62,15 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.event.title}"
+
+class UserPreferences(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preferences')
+    theme_mode = models.CharField(max_length=10, default='light')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s preferences"
+
+    class Meta:
+        verbose_name_plural = 'User preferences'
