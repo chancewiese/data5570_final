@@ -2,7 +2,7 @@
 
 git information for pushing changes:
 username: chancewiese
-password: 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
+password: 
 
 1. Make it so events can be 'sub-events' or children events of other ones. 
     We can limit it so each child can only have 1 parent event, 
