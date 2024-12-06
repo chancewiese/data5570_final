@@ -253,7 +253,7 @@ const EventDetailPage = () => {
           onImagesChange={fetchEventData}
         />
       </Paper>
-    )}
+      )}
 
       <Grid container spacing={4}>
         {/* Registration Form or Status */}

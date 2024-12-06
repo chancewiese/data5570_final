@@ -14,7 +14,7 @@ class EventImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EventImage
-        fields = ('id', 'image_url', 'caption', 'order', 'is_primary')
+        fields = ('id', 'image_url', 'caption', 'is_primary')
 
     def get_image_url(self, obj):
         if obj.image:

@@ -15,9 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  Upload,
-  MoveLeft,
-  MoveRight
+  Upload
 } from 'lucide-react';
 import axios from '../utils/axios';
 
@@ -29,18 +27,9 @@ const EventGallery = ({ event, isAdmin, onImagesChange }) => {
   const [images, setImages] = useState(event.images || []);
   const isDarkMode = theme.palette.mode === 'dark';
 
-  // Only update images from props if the length or order has changed
   useEffect(() => {
-    if (!event.images) return;
-    
-    const hasOrderChanged = event.images.some((img, idx) => {
-      return !images[idx] || images[idx].id !== img.id;
-    });
-    
-    if (hasOrderChanged || event.images.length !== images.length) {
-      setImages(event.images);
-    }
-  }, [event.images]); // eslint-disable-line react-hooks/exhaustive-deps
+    setImages(event.images || []);
+  }, [event.images]);
 
   const handleImageClick = (image, index) => {
     setSelectedImage({ ...image, index });
@@ -58,53 +47,6 @@ const EventGallery = ({ event, isAdmin, onImagesChange }) => {
   const handleNext = () => {
     const newIndex = (selectedImage.index + 1) % images.length;
     setSelectedImage({ ...images[newIndex], index: newIndex });
-  };
-
-  const handleMoveImage = async (imageId, direction) => {
-    try {
-      setError(null);
-      const currentIndex = images.findIndex(img => img.id === imageId);
-      if (currentIndex === -1) return;
-
-      let newIndex;
-      if (direction === 'left' && currentIndex > 0) {
-        newIndex = currentIndex - 1;
-      } else if (direction === 'right' && currentIndex < images.length - 1) {
-        newIndex = currentIndex + 1;
-      } else {
-        return; // Invalid move
-      }
-
-      // Update local state immediately for smooth UI
-      const newImages = [...images];
-      const [movedImage] = newImages.splice(currentIndex, 1);
-      newImages.splice(newIndex, 0, movedImage);
-      setImages(newImages);
-
-      // Send request to backend
-      const formData = new FormData();
-      formData.append('image_id', imageId);
-      formData.append('direction', direction);
-
-      await axios.post(
-        `/api/events/${event.url_name}/reorder_images/`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      
-      // Only refresh parent if the request was successful
-      onImagesChange();
-    } catch (err) {
-      console.error('Failed to reorder images:', err);
-      setError(err.response?.data?.detail || 'Failed to reorder images');
-      
-      // Revert local state on error
-      setImages(event.images || []);
-    }
   };
 
   const handleFileSelect = async (e) => {
@@ -206,9 +148,6 @@ const EventGallery = ({ event, isAdmin, onImagesChange }) => {
           <ImageListItem 
             key={image.id} 
             className="relative"
-            sx={{
-              transition: 'all 0.3s ease-in-out',
-            }}
           >
             <Paper 
               elevation={2} 
@@ -228,41 +167,7 @@ const EventGallery = ({ event, isAdmin, onImagesChange }) => {
                 />
                 {isAdmin && (
                   <div className="image-controls absolute bottom-0 left-0 right-0 bg-black/50 p-2 opacity-0 transition-opacity duration-200">
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-1">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleMoveImage(image.id, 'left')}
-                          disabled={index === 0}
-                          sx={{
-                            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'white',
-                            '&:hover': {
-                              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#f5f5f5',
-                            },
-                            '&.Mui-disabled': {
-                              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0',
-                            }
-                          }}
-                        >
-                          <MoveLeft className="w-4 h-4" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleMoveImage(image.id, 'right')}
-                          disabled={index === images.length - 1}
-                          sx={{
-                            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'white',
-                            '&:hover': {
-                              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#f5f5f5',
-                            },
-                            '&.Mui-disabled': {
-                              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0',
-                            }
-                          }}
-                        >
-                          <MoveRight className="w-4 h-4" />
-                        </IconButton>
-                      </div>
+                    <div className="flex justify-end">
                       <IconButton
                         size="small"
                         onClick={() => handleDeleteImage(image.id)}
