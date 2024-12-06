@@ -1,1 +1,1 @@
-[{"Metadata":[{"Key":"result","Value":"Succeeded"},{"Key":"awsAccount","Value":"n/a"},{"Key":"computeRegion","Value":"us-west-1"},{"Key":"awsRegion","Value":"us-west-1"}],"MetricName":"session_end","Value":6157107,"Unit":"None","Passive":true,"EpochTimestamp":1733445012483}]
+[{"Metadata":[{"Key":"result","Value":"Succeeded"},{"Key":"awsAccount","Value":"n/a"},{"Key":"computeRegion","Value":"us-west-1"},{"Key":"awsRegion","Value":"us-west-1"}],"MetricName":"session_end","Value":9089477,"Unit":"None","Passive":true,"EpochTimestamp":1733465417492}]
