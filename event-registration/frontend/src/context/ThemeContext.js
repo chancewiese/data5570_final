@@ -1,10 +1,21 @@
-// src/context/ThemeContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme, alpha } from '@mui/material';
 import { useSelector } from 'react-redux';
 import axios from '../utils/axios';
 
 const ThemeContext = createContext(null);
+
+// Color palette constants
+const palette = {
+  warmOrange: '#FF7D3C',
+  coral: '#FF5F5F',
+  peach: '#FFAA8C',
+  sand: '#F7E2D0',
+  cream: '#FFF8E7',
+  charcoal: '#2A2826',
+  slate: '#3F3D3A',
+  warmGray: '#625D58'
+};
 
 // Helper to get system preference
 const getSystemTheme = () => {
@@ -52,31 +63,131 @@ export const ThemeProvider = ({ children }) => {
   const theme = createTheme({
     palette: {
       mode: resolvedTheme,
-      ...(resolvedTheme === 'dark' ? {
-        primary: {
-          main: '#90caf9',
+      primary: {
+        main: resolvedTheme === 'light' ? palette.warmOrange : palette.peach,
+        light: resolvedTheme === 'light' ? palette.peach : palette.warmOrange,
+        dark: palette.coral,
+        contrastText: resolvedTheme === 'light' ? '#fff' : palette.charcoal,
+      },
+      secondary: {
+        main: resolvedTheme === 'light' ? palette.coral : palette.sand,
+        light: palette.sand,
+        dark: palette.coral,
+        contrastText: resolvedTheme === 'light' ? '#fff' : palette.charcoal,
+      },
+      background: {
+        default: resolvedTheme === 'light' ? palette.cream : palette.charcoal,
+        paper: resolvedTheme === 'light' ? '#fff' : palette.slate,
+      },
+      text: {
+        primary: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+        secondary: resolvedTheme === 'light' ? palette.warmGray : palette.sand,
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+      h1: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+      h2: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+      h3: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+      h4: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+      h5: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+      h6: {
+        fontWeight: 600,
+        color: resolvedTheme === 'light' ? palette.charcoal : palette.cream,
+      },
+    },
+    components: {
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: resolvedTheme === 'light' ? palette.warmOrange : palette.slate,
+            color: resolvedTheme === 'light' ? '#fff' : palette.cream,
+          },
         },
-        background: {
-          default: '#121212',
-          paper: '#1e1e1e',
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 500,
+          },
+          contained: {
+            boxShadow: 'none',
+            '&:hover': {
+              boxShadow: 'none',
+            },
+          },
+          outlined: {
+            borderWidth: '2px',
+            '&:hover': {
+              borderWidth: '2px',
+            },
+          },
         },
-      } : {
-        primary: {
-          main: '#1976d2',
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: '12px',
+            boxShadow: resolvedTheme === 'light' 
+              ? '0 2px 8px rgba(0,0,0,0.08)'
+              : '0 2px 8px rgba(0,0,0,0.2)',
+          },
         },
-      }),
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            borderRadius: '12px',
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '8px',
+            margin: '2px 8px',
+            '&.Mui-selected': {
+              backgroundColor: alpha(
+                resolvedTheme === 'light' ? palette.warmOrange : palette.peach,
+                0.12
+              ),
+              '&:hover': {
+                backgroundColor: alpha(
+                  resolvedTheme === 'light' ? palette.warmOrange : palette.peach,
+                  0.18
+                ),
+              },
+            },
+          },
+        },
+      },
     },
   });
 
   // Listen for system theme changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const handleChange = () => {
       if (themeMode === 'system') {
-        // Force a re-render when system theme changes and we're in system mode
         setThemeMode('system');
       }
     };

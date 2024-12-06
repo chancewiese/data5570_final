@@ -16,9 +16,10 @@ Other:
 `Real-Time Updates`: Enable live updates for event availability using WebSockets or long polling, so users see changes instantly.
 `Notifications`: Let users sign up for email or SMS reminders for upcoming events to keep them informed.
 `Waitlist Management`: Add a feature for users to join a waitlist for fully booked events, so they can be notified if spots open up.
-`Family Accounts` : Add family members to accounts. When accounts have no family members, prompt them to add family 
+`Family Accounts`: Add family members to accounts. When accounts have no family members, prompt them to add family 
     members so we have names and birthdays, etc. When registering, have a pop-up for which members to add. 
     Might need to add a family member part to the auth context so we know if they have no family members. Could map list of family member objects on account. 
+`Rearrange Gallery Photos`: Ability to rearrange gallery photos. I *Chance* have worked on this for hours and couldn't get it to work. So maybe later, but not a huge priority right now.
 
 
 
