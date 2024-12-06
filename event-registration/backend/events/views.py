@@ -2,36 +2,39 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Event, Registration, UserPreferences
-from .serializers import EventSerializer, RegistrationSerializer, UserSerializer, UserPreferencesSerializer
+from .models import Event, Registration, UserPreferences, EventImage
+from .serializers import (
+    EventSerializer, 
+    RegistrationSerializer, 
+    UserSerializer, 
+    UserPreferencesSerializer,
+    EventImageSerializer
+)
+from PIL import Image
+import os
 
 class IsStaffOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Allow all read-only requests
         if request.method in permissions.SAFE_METHODS:
             return True
         
-        # Check if this is a registration action
         if view.action in ['register', 'registration']:
             return request.user.is_authenticated
             
-        # Only staff can create/edit/delete events
         return request.user.is_staff
 
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request
         if request.method in permissions.SAFE_METHODS:
             return True
             
-        # Check if this is a registration action
         if view.action in ['register', 'registration']:
             return request.user.is_authenticated
             
-        # Write permissions are only allowed to staff
         return request.user.is_staff
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -45,7 +48,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         try:
-            print("Received data:", request.data)
             required_fields = ['username', 'password', 'first_name', 'last_name']
             for field in required_fields:
                 if not request.data.get(field):
@@ -85,7 +87,6 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         except Exception as e:
-            print("Error creating user:", str(e))
             return Response(
                 {'detail': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
@@ -138,13 +139,179 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     lookup_field = 'url_name'
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsStaffOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
-        return Event.objects.all().prefetch_related('registrations', 'registrations__user')
+        return Event.objects.all().prefetch_related(
+            'registrations', 
+            'registrations__user',
+            'images'
+        )
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    def validate_image(self, image):
+        # Validate file size (max 5MB)
+        if image.size > 5 * 1024 * 1024:
+            raise ValidationError("Image file too large ( > 5MB )")
+        
+        # Validate file type
+        try:
+            img = Image.open(image)
+            img.verify()
+            if img.format.lower() not in ['jpeg', 'jpg', 'png', 'gif']:
+                raise ValidationError("Unsupported image format")
+        except:
+            raise ValidationError("Invalid image file")
+
+    @action(detail=True, methods=['POST'])
+    def upload_images(self, request, url_name=None):
+        event = self.get_object()
+        
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "Only staff can upload images"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    
+        try:
+            images = request.FILES.getlist('images')
+            captions = request.POST.getlist('captions', [])
+            
+            if not images:
+                return Response(
+                    {"detail": "No images provided"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+    
+            # Get the highest current order
+            last_order = EventImage.objects.filter(event=event).order_by('-order').first()
+            next_order = (last_order.order + 1) if last_order else 0
+    
+            uploaded_images = []
+            for i, image in enumerate(images):
+                try:
+                    self.validate_image(image)
+                    
+                    caption = captions[i] if i < len(captions) else ""
+                    event_image = EventImage.objects.create(
+                        event=event,
+                        image=image,
+                        caption=caption,
+                        uploaded_by=request.user,
+                        is_primary=i == 0 and not EventImage.objects.filter(event=event).exists(),
+                        order=next_order + i  # Add this line
+                    )
+                    uploaded_images.append(event_image)
+                except ValidationError as e:
+                    return Response(
+                        {"detail": str(e)},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+    
+            serializer = EventImageSerializer(
+                uploaded_images, 
+                many=True,
+                context={'request': request}
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['POST'])
+    def delete_image(self, request, url_name=None):
+        event = self.get_object()
+        image_id = request.POST.get('image_id')
+    
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "Only staff can delete images"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+    
+        try:
+            image = EventImage.objects.get(id=image_id, event=event)
+            image.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except EventImage.DoesNotExist:
+            return Response(
+                {"detail": "Image not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=True, methods=['POST'])
+    def set_primary_image(self, request, url_name=None):
+        event = self.get_object()
+        image_id = request.data.get('image_id')
+
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "Only staff can set primary image"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            image = EventImage.objects.get(id=image_id, event=event)
+            image.is_primary = True
+            image.save()
+            return Response(
+                EventImageSerializer(image, context={'request': request}).data
+            )
+        except EventImage.DoesNotExist:
+            return Response(
+                {"detail": "Image not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(detail=True, methods=['POST'])
+    def reorder_images(self, request, url_name=None):
+        event = self.get_object()
+        image_id = request.data.get('image_id')
+        direction = request.data.get('direction')
+        
+        try:
+            # Get all images for this event, ordered by current order
+            images = list(event.images.all().order_by('order'))
+            current_image = next((img for img in images if str(img.id) == str(image_id)), None)
+            
+            if not current_image:
+                return Response(
+                    {'detail': 'Image not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            current_index = images.index(current_image)
+            
+            if direction == 'left' and current_index > 0:
+                # Swap with previous image
+                previous_image = images[current_index - 1]
+                current_image.order, previous_image.order = previous_image.order, current_image.order
+                current_image.save()
+                previous_image.save()
+                
+            elif direction == 'right' and current_index < len(images) - 1:
+                # Swap with next image
+                next_image = images[current_index + 1]
+                current_image.order, next_image.order = next_image.order, current_image.order
+                current_image.save()
+                next_image.save()
+            
+            # Return updated image list
+            serializer = self.get_serializer(event)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error reordering images: {str(e)}")  # Debug log
+            return Response(
+                {'detail': 'Failed to reorder images'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
     @action(detail=True, methods=['POST'])
     def register(self, request, url_name=None):
         try:
@@ -156,21 +323,18 @@ class EventViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_401_UNAUTHORIZED
                 )
 
-            # Check if user is already registered
             if Registration.objects.filter(event=event, user=request.user).exists():
                 return Response(
                     {"detail": "You are already registered for this event"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Check if event is full (only if there's a capacity limit)
             if event.capacity is not None and event.registrations.count() >= event.capacity:
                 return Response(
                     {"detail": "This event is fully booked"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Create registration
             registration = Registration.objects.create(
                 event=event,
                 user=request.user,
@@ -181,7 +345,6 @@ class EventViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            print(f"Registration error: {str(e)}")
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -212,5 +375,4 @@ class RegistrationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Always show only the user's own registrations
         return Registration.objects.filter(user=self.request.user)

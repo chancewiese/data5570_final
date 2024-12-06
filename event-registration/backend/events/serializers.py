@@ -1,13 +1,25 @@
 # events/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Event, Registration, UserPreferences
+from .models import Event, Registration, UserPreferences, EventImage
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_staff')
         read_only_fields = ('is_staff',)
+
+class EventImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EventImage
+        fields = ('id', 'image_url', 'caption', 'order', 'is_primary')
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 class EventSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
@@ -16,6 +28,7 @@ class EventSerializer(serializers.ModelSerializer):
     is_registered = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
     remaining_capacity = serializers.SerializerMethodField()
+    images = EventImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Event
@@ -35,12 +48,12 @@ class EventSerializer(serializers.ModelSerializer):
             'registered_users_count',
             'is_registered',
             'can_edit',
-            'remaining_capacity'
+            'remaining_capacity',
+            'images'
         )
         read_only_fields = ('created_by', 'created_at', 'updated_at')
 
     def validate_url_name(self, value):
-        # Check if url_name is unique when creating or updating
         instance = self.instance
         if Event.objects.filter(url_name=value).exclude(pk=instance.pk if instance else None).exists():
             raise serializers.ValidationError("This URL name is already in use.")
@@ -69,7 +82,7 @@ class EventSerializer(serializers.ModelSerializer):
         return False
 
     def get_remaining_capacity(self, obj):
-        if obj.capacity is None:  # If there's no capacity limit
+        if obj.capacity is None:
             return None
         confirmed_registrations = obj.registrations.filter(status='confirmed').count()
         return max(0, obj.capacity - confirmed_registrations)

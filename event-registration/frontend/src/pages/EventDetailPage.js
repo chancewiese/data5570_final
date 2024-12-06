@@ -34,6 +34,7 @@ import {
 import EventForm from '../components/EventForm';
 import { Share2 } from 'lucide-react';
 import ShareDialog from '../components/ShareDialog';
+import EventGallery from '../components/EventGallery';
 
 const EventDetailPage = () => {
   const { urlName } = useParams();
@@ -239,6 +240,20 @@ const EventDetailPage = () => {
           </Alert>
         )}
       </Paper>
+      
+      {/* Event Gallery */}
+      {(event.images?.length > 0 || isAdmin) && (
+      <Paper elevation={3} sx={{ p: 4, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Event Gallery
+        </Typography>
+        <EventGallery 
+          event={event} 
+          isAdmin={isAdmin} 
+          onImagesChange={fetchEventData}
+        />
+      </Paper>
+    )}
 
       <Grid container spacing={4}>
         {/* Registration Form or Status */}

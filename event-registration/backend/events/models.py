@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+import os
 
 class Event(models.Model):
     title = models.CharField(max_length=200)
@@ -30,6 +31,57 @@ class Event(models.Model):
     class Meta:
         ordering = ['date', 'time']
 
+def event_image_path(instance, filename):
+    # Generate path like: event_images/event_<id>/<filename>
+    return f'event_images/event_{instance.event.id}/{filename}'
+    
+class EventImage(models.Model):
+    event = models.ForeignKey(
+        'Event',
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    image = models.ImageField(upload_to=event_image_path)
+    caption = models.CharField(max_length=200, blank=True)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    order = models.IntegerField(default=0)
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['order', '-uploaded_at']
+
+    def save(self, *args, **kwargs):
+        # If this is a new image (no ID yet), set order to the next available number
+        if not self.id:
+            max_order = self.event.images.aggregate(models.Max('order'))['order__max']
+            self.order = 0 if max_order is None else max_order + 1
+
+        # If this is marked as primary, unmark other primary images
+        if self.is_primary:
+            EventImage.objects.filter(event=self.event, is_primary=True).update(is_primary=False)
+            
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Delete the image file when the model instance is deleted
+        if self.image:
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        
+        # Get the current order before deletion
+        current_order = self.order
+        
+        super().delete(*args, **kwargs)
+        
+        # Update the order of remaining images
+        self.event.images.filter(order__gt=current_order).update(
+            order=models.F('order') - 1
+        )
 
 class Registration(models.Model):
     STATUS_CHOICES = [
