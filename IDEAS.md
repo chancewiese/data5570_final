@@ -2,6 +2,7 @@
 
 Priority:
 `Google Maps/OpenStreetMap`: Show event locations on a map and have a direction notes box.
+`Edit Account Info`: Be able to change account email, password, etc.
 
 
 Other:
