@@ -1,18 +1,14 @@
 ## Ideas and suggestions here
 
-
-
 Priority:
 `Google Maps/OpenStreetMap`: Show event locations on a map and have a direction notes box.
-2. Improve homepage looks, maybe have a box with upcoming events on the homepage.
-
 
 
 Other:
 1. Make it so events can be 'sub-events' or children events of other ones. 
     We can limit it so each child can only have 1 parent event, 
-    and if it's a parent event, it can't have a parent event itself
-6. Custom registration forms (this might be a big one)
+    and if it's a parent event, it can't have a parent event itself.
+6. Custom registration forms.
 `Real-Time Updates`: Enable live updates for event availability using WebSockets or long polling, so users see changes instantly.
 `Notifications`: Let users sign up for email or SMS reminders for upcoming events to keep them informed.
 `Waitlist Management`: Add a feature for users to join a waitlist for fully booked events, so they can be notified if spots open up.
@@ -20,7 +16,6 @@ Other:
     members so we have names and birthdays, etc. When registering, have a pop-up for which members to add. 
     Might need to add a family member part to the auth context so we know if they have no family members. Could map list of family member objects on account. 
 `Rearrange Gallery Photos`: Ability to rearrange gallery photos. I *Chance* have worked on this for hours and couldn't get it to work. So maybe later, but not a huge priority right now.
-
 
 
 Added:
@@ -34,3 +29,5 @@ Added:
 `Social Sharing`: Include share buttons so users can promote events on their social media platforms.
         - 5. QR code for events/sharing pop-up from events page. 
 3. Add the ability to add images or attachments to an event card or event page. Maybe a gallery
+2. Improve homepage looks, maybe have a box with upcoming events on the homepage.
+`Add Theme`: Add a theme to personalize the site so it's not so MUI-like.
