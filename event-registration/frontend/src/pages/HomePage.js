@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from '../utils/axios';
 import { 
   Search,
@@ -12,27 +12,41 @@ import {
   MessageCircle
 } from 'lucide-react';
 import heroBanner from '../assets/images/hero/booths.jpg';
-import debounce from 'lodash/debounce';
-import { Button } from '@mui/material';
+import { 
+  Button,
+  Typography,
+  Box,
+  Container,
+  Paper,
+  InputBase,
+  IconButton,
+  Grid,
+  Card,
+  CardContent,
+  useTheme
+} from '@mui/material';
 
 export default function HomePage() {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
-  const searchRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
-  // Handle click outside of search
+  // Add click outside listener
   useEffect(() => {
     function handleClickOutside(event) {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setShowResults(false);
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const handleSearch = async (value) => {
@@ -52,15 +66,10 @@ export default function HomePage() {
     }
   };
 
-  const debouncedSearch = useCallback(
-    debounce((value) => handleSearch(value), 300),
-    []
-  );
-
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    debouncedSearch(value);
+    setTimeout(() => handleSearch(value), 300);
   };
 
   const handleResultClick = (urlName) => {
@@ -80,73 +89,104 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: <CalendarDays className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <CalendarDays className="w-8 h-8" />,
       title: "Easy Event Management",
       description: "Create and manage events with just a few clicks. Set dates, capacity, and location all in one place."
     },
     {
-      icon: <Users className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <Users className="w-8 h-8" />,
       title: "Simple Registration",
       description: "Quick and hassle-free registration process for attendees. Track registrations in real-time."
     },
     {
-      icon: <Bell className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <Bell className="w-8 h-8" />,
       title: "Event Updates",
       description: "Keep attendees informed with automatic notifications about event changes and reminders."
     },
     {
-      icon: <QrCode className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <QrCode className="w-8 h-8" />,
       title: "QR Code Check-in",
       description: "Generate unique QR codes for each registration to streamline the check-in process."
     },
     {
-      icon: <ShieldCheck className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <ShieldCheck className="w-8 h-8" />,
       title: "Secure Platform",
       description: "Your data is protected with our secure authentication and data protection measures."
     },
     {
-      icon: <MessageCircle className="w-8 h-8 mb-4 text-warmOrange dark:text-peach" />,
+      icon: <MessageCircle className="w-8 h-8" />,
       title: "Communication Tools",
       description: "Built-in messaging system to communicate with attendees before and after events."
     }
   ];
 
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: '100vh' }}>
       {/* Hero Section */}
-      <div className="relative">
-        {/* Dark overlay for better text visibility */}
-        <div className="absolute inset-0 bg-black/50" />
-        
-        {/* Background image */}
-        <div className="absolute inset-0">
-          <img
-            src={heroBanner}
-            alt="Event exhibition booths"
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <Box sx={{
+        position: 'relative',
+        height: '80vh',
+        display: 'flex',
+        alignItems: 'center',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1
+        }
+      }}>
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          '& img': {
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }
+        }}>
+          <img src={heroBanner} alt="Event exhibition booths" />
+        </Box>
 
-        {/* Hero Content */}
-        <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-white">
-              Streamline Your Event Management
-            </h1>
-            <p className="mt-6 max-w-2xl mx-auto text-xl text-white">
-              From registration to check-in, we make organizing events simple. 
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
+          <Box sx={{ textAlign: 'center', color: 'common.white' }}>
+            <Typography variant="h2" component="h1" gutterBottom>
+              Welcome to EventFlow
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 6 }}>
+              From registration to check-in, we make organizing events simple.
               Create, manage, and track your events all in one place.
-            </p>
+            </Typography>
 
-            {/* Search Bar */}
-            <div className="mt-8 max-w-2xl mx-auto relative" ref={searchRef}>
-              <div className="flex items-center justify-center bg-white dark:bg-slate rounded-lg p-1 shadow-lg">
-                <input
-                  type="text"
+            {/* Search Container */}
+            <Box 
+              ref={searchContainerRef}
+              sx={{ 
+                position: 'relative', 
+                maxWidth: 600, 
+                mx: 'auto', 
+                mb: 4 
+              }}
+            >
+              {/* Search Bar */}
+              <Paper sx={{ p: 0.5, display: 'flex' }}>
+                <InputBase
+                  fullWidth
+                  placeholder="Search events..."
                   value={searchTerm}
                   onChange={handleSearchChange}
-                  placeholder="Search events..."
-                  className="w-full px-4 py-2 text-charcoal dark:text-white placeholder-warmGray dark:placeholder-sand/70 bg-transparent focus:outline-none rounded-lg"
+                  onClick={() => {
+                    if (searchTerm.trim() && searchResults.length > 0) {
+                      setShowResults(true);
+                    }
+                  }}
+                  sx={{ ml: 2 }}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       navigate(`/events?search=${searchTerm}`);
@@ -154,55 +194,66 @@ export default function HomePage() {
                     }
                   }}
                 />
-                <button 
-                  className="p-2 text-warmOrange hover:text-coral dark:text-sand dark:hover:text-peach transition-colors"
+                <IconButton 
                   onClick={() => {
                     navigate(`/events?search=${searchTerm}`);
                     setShowResults(false);
                   }}
                 >
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
+                  <Search />
+                </IconButton>
+              </Paper>
 
               {/* Search Results Dropdown */}
               {showResults && searchResults.length > 0 && (
-                <div className="absolute w-full mt-2 bg-white dark:bg-slate rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
-                  <div className="p-2">
-                    {searchResults.map((event) => (
-                      <div
-                        key={event.id}
-                        onClick={() => handleResultClick(event.url_name)}
-                        className="p-3 hover:bg-sand/50 dark:hover:bg-warmGray/20 cursor-pointer rounded-md"
-                      >
-                        <div className="font-medium text-charcoal dark:text-white">
-                          {event.title}
-                        </div>
-                        <div className="text-sm text-warmGray dark:text-sand">
-                          {new Date(event.date).toLocaleDateString()} at {formatTime(event.time)}
-                        </div>
-                      </div>
-                    ))}
-                    <div 
-                      className="p-2 text-center border-t border-sand dark:border-warmGray/20 text-warmOrange dark:text-peach cursor-pointer hover:bg-sand/50 dark:hover:bg-warmGray/20"
-                      onClick={() => {
-                        navigate(`/events?search=${searchTerm}`);
-                        setShowResults(false);
+                <Paper sx={{
+                  position: 'absolute',
+                  width: '100%',
+                  mt: '2px',
+                  maxHeight: 400,
+                  overflow: 'auto',
+                  zIndex: 1300,
+                  boxShadow: theme.shadows[3]
+                }}>
+                  {searchResults.map((event) => (
+                    <Box
+                      key={event.id}
+                      onClick={() => handleResultClick(event.url_name)}
+                      sx={{
+                        p: 2,
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s',
+                        '&:hover': {
+                          bgcolor: theme.palette.action.hover
+                        }
                       }}
                     >
-                      View all results
-                    </div>
-                  </div>
-                </div>
+                      <Typography variant="subtitle1">
+                        {event.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(event.date).toLocaleDateString()} at {formatTime(event.time)}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Paper>
               )}
-            </div>
+            </Box>
 
             {/* CTA Buttons */}
-            <div className="mt-8 flex justify-center gap-4 flex-wrap">
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
               <Button
                 variant="contained"
                 onClick={() => navigate('/events')}
-                sx={{ backgroundColor: 'white', color: 'warmOrange', '&:hover': { backgroundColor: '#F7E2D0' } }}
+                sx={{ 
+                  bgcolor: 'common.white', 
+                  color: 'primary.main',
+                  '&:hover': { 
+                    bgcolor: 'grey.100',
+                    transform: 'translateY(-2px)',
+                    transition: 'transform 0.2s'
+                  }
+                }}
               >
                 Browse Events
               </Button>
@@ -212,6 +263,12 @@ export default function HomePage() {
                   variant="contained"
                   onClick={() => navigate('/register')}
                   color="primary"
+                  sx={{
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      transition: 'transform 0.2s'
+                    }
+                  }}
                 >
                   Sign Up Now
                 </Button>
@@ -222,47 +279,71 @@ export default function HomePage() {
                   variant="contained"
                   onClick={() => navigate('/events/create')}
                   color="secondary"
+                  sx={{
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      transition: 'transform 0.2s'
+                    }
+                  }}
                 >
                   Create Event
                 </Button>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
       {/* Features Section */}
-      <div className="bg-cream dark:bg-charcoal">
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-charcoal dark:text-white">
+      <Box sx={{ 
+        bgcolor: theme.palette.mode === 'light' ? 'grey.50' : 'background.paper',
+        py: 8 
+      }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Typography variant="h3" gutterBottom>
               Why Choose Our Platform?
-            </h2>
-            <p className="mt-4 text-lg text-warmGray dark:text-sand">
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
               Everything you need to successfully manage your events
-            </p>
-          </div>
+            </Typography>
+          </Box>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Grid container spacing={4}>
             {features.map((feature, index) => (
-              <div
-                key={index}
-                className="p-6 bg-white dark:bg-slate rounded-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
-              >
-                <div className="text-center">
-                  {feature.icon}
-                  <h3 className="text-xl font-semibold mb-2 text-charcoal dark:text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-warmGray dark:text-sand">
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
+              <Grid item xs={12} md={6} lg={4} key={index}>
+                <Card sx={{
+                  height: '100%',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[6]
+                  }
+                }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Box sx={{ 
+                      color: 'primary.main',
+                      mb: 2,
+                      '& > svg': {
+                        width: 40,
+                        height: 40
+                      }
+                    }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography variant="h6" gutterBottom>
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Grid>
+        </Container>
+      </Box>
+    </Box>
   );
 }

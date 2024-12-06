@@ -83,7 +83,7 @@ const Sidebar = () => {
     }}>
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
         <EventIcon />
-        <Typography variant="h6">Event Registration</Typography>
+        <Typography variant="h6">EventFlow</Typography>
       </Box>
       
       <Divider />

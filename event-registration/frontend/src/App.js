@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -52,6 +52,11 @@ const AppRoutes = () => {
 };
 
 const App = () => {
+  
+  useEffect(() => {
+    document.title = 'EventFlow';
+  }, []);
+  
   return (
     <Provider store={store}>
       <ThemeProvider>

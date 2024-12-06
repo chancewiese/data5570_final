@@ -20,7 +20,7 @@ const Header = () => {
             color: 'inherit' 
           }}
         >
-          Event Registration
+          EventFlow
         </Typography>
       </Toolbar>
     </AppBar>
